@@ -146,23 +146,19 @@ const isVeryStale = computed(() => {
   flex-direction: column;
   justify-content: space-between;
   transition: transform 0.2s ease, border 0.2s ease, background 0.2s ease;
-  border: 1px solid rgba(20, 20, 30, 0.06);
+  border: 1px solid rgba(255, 193, 7, 0.8);
   color: #0f111a;
 }
 
 .v-theme--dashboardDark .sensor-card {
   background: rgba(19, 20, 27, 0.95);
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 213, 79, 0.9);
   color: #f4f6ff;
 }
 
 .sensor-card--placeholder {
   opacity: 0.4;
   border-style: dashed;
-}
-
-.sensor-card--stale:not(.sensor-card--placeholder) {
-  border-color: rgba(255, 193, 7, 0.8);
 }
 
 .sensor-card__content {
