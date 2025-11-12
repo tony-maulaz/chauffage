@@ -84,6 +84,8 @@ class SensorResponse(DeviceResponse):
     battery_low: Optional[bool]
     last_update: Optional[datetime]
     seconds_since_update: Optional[int]
+    setpoint_temperature: Optional[float]
+    regulation_status: Optional[str]
 
 
 async def ensure_home(refresh: bool = True) -> AsyncHome:
@@ -118,10 +120,17 @@ def _sensor_payload(device) -> SensorResponse:
         or _numeric_value(getattr(device, "measuredTemperature", None))
     )
     humidity = _numeric_value(getattr(device, "humidity", None))
+    setpoint = _numeric_value(
+        getattr(device, "setPointTemperature", None)
+        or getattr(device, "setTemperature", None)
+    )
+    regulation_status = _regulation_status(temperature, setpoint)
     return SensorResponse(
         **base_payload,
         temperature=temperature,
         humidity=humidity,
+        setpoint_temperature=setpoint,
+        regulation_status=regulation_status,
     )
 
 
@@ -184,6 +193,14 @@ def _enum_name(value) -> Optional[str]:
     if hasattr(value, "value"):
         return value.value
     return str(value)
+
+
+def _regulation_status(
+    current_temperature: Optional[float], setpoint_temperature: Optional[float]
+) -> Optional[str]:
+    if current_temperature is None or setpoint_temperature is None:
+        return None
+    return "cold" if setpoint_temperature > current_temperature else "hot"
 
 
 @app.on_event("startup")

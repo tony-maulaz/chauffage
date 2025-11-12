@@ -2,39 +2,9 @@
   <v-app class="dashboard-app">
     <v-main>
       <div class="dashboard">
-        <header class="dashboard__header">
-          <div>
-            <h1>Températures</h1>
-            <p>
-              Mise à jour :
-              <span>{{ lastRefreshLabel }}</span>
-            </p>
-          </div>
-          <div class="dashboard__actions">
-            <v-btn
-              icon="mdi-fullscreen"
-              variant="text"
-              @click="toggleFullscreen"
-            ></v-btn>
-            <v-btn
-              icon="mdi-refresh"
-              variant="text"
-              :loading="loading"
-              @click="loadSensors"
-            ></v-btn>
-          </div>
-        </header>
-
-        <v-alert
-          v-if="error"
-          type="error"
-          variant="tonal"
-          class="mb-4"
-          density="comfortable"
-        >
-          {{ error }}
-        </v-alert>
-
+        <div v-if="DEBUG_MODE" class="dashboard__debug-banner">
+          Mode debug actif — valeurs simulées (battery_low incluses)
+        </div>
         <div class="dashboard__grid">
           <SensorCard
             v-for="card in orderedCards"
@@ -45,6 +15,8 @@
             :last-update="card.data?.last_update ?? null"
             :battery-low="card.data?.battery_low ?? false"
             :reachable="card.data?.reachable ?? true"
+            :setpoint-temperature="card.data?.setpoint_temperature ?? null"
+            :regulation-status="card.data?.regulation_status ?? null"
             :placeholder="card.placeholder"
           />
         </div>
@@ -56,8 +28,11 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import sensorsConfig from "@/config/sensors";
+import { DEBUG_MODE, buildDebugSensors } from "@/config/debug";
+import { APP_THEME_MODE } from "@/config/app";
 import { fetchSensors } from "@/services/api";
 import SensorCard from "@/components/SensorCard.vue";
+import { useThemeController } from "@/composables/useThemeController";
 
 const POLL_INTERVAL = Number(import.meta.env.VITE_POLL_INTERVAL || 60000);
 const MAX_SLOTS = 12;
@@ -65,8 +40,18 @@ const MAX_SLOTS = 12;
 const sensors = ref([]);
 const loading = ref(false);
 const error = ref(null);
-const lastRefresh = ref(null);
 let intervalId;
+let autoThemeInterval;
+
+const { applyThemeMode } = useThemeController();
+
+const applyInitialTheme = () => {
+  applyThemeMode(APP_THEME_MODE);
+  if (APP_THEME_MODE === "auto") {
+    autoThemeInterval = window.setInterval(() => applyThemeMode("auto"), 60 * 1000);
+  }
+};
+applyInitialTheme();
 
 const normalizedConfig = computed(() =>
   sensorsConfig
@@ -102,34 +87,22 @@ const orderedCards = computed(() => {
   return slots;
 });
 
-const lastRefreshLabel = computed(() => {
-  if (!lastRefresh.value) return "—";
-  return lastRefresh.value.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-});
-
 async function loadSensors() {
+  if (DEBUG_MODE) {
+    sensors.value = buildDebugSensors(sensorsConfig);
+    return;
+  }
+
   try {
     loading.value = true;
     error.value = null;
     const payload = await fetchSensors();
     sensors.value = payload;
-    lastRefresh.value = new Date();
   } catch (err) {
     console.error(err);
     error.value = err.message || "Impossible de récupérer les capteurs";
   } finally {
     loading.value = false;
-  }
-}
-
-function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen?.();
-  } else {
-    document.exitFullscreen?.();
   }
 }
 
@@ -140,51 +113,34 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.clearInterval(intervalId);
+  if (autoThemeInterval) {
+    window.clearInterval(autoThemeInterval);
+  }
 });
 </script>
 
 <style scoped>
-.dashboard-app {
-  background: radial-gradient(circle at top, #1f1f2f, #0c0c12);
-}
-
 .dashboard {
   min-height: 100vh;
-  padding: 24px clamp(16px, 5vw, 48px) 40px;
-  color: #fafafa;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: clamp(16px, 4vw, 40px);
 }
 
-.dashboard__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.dashboard__header h1 {
-  margin: 0;
-  font-size: 1.8rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.dashboard__header p {
-  margin: 4px 0 0;
-  opacity: 0.7;
-}
-
-.dashboard__actions {
-  display: flex;
-  gap: 8px;
+.dashboard__debug-banner {
+  background: #ffecb3;
+  color: #5d4037;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.3px;
 }
 
 .dashboard__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 18px;
+  gap: 16px;
 }
 
 @media (min-width: 1024px) {

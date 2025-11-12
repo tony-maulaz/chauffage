@@ -48,6 +48,7 @@ Plusieurs fichiers sont ignorés par Git car ils contiennent des secrets. Copiez
 cp config.ini.example config.ini                   # utilisé par le backend FastAPI
 cp token.txt.example token.txt                     # token plugin pour les clients/tests
 cp test_api/token.txt.example test_api/token.txt   # équivalent pour test_api/
+cp chauffage/frontend/.env.example chauffage/frontend/.env.local  # options frontend
 ```
 
 `test_api/authtoken.txt.example` reste disponible pour générer un second token si besoin.
@@ -181,3 +182,32 @@ chauffage/
 
 N’hésitez pas à adapter ces scripts (Makefile, CI/CD, etc.) selon votre environnement. Le README reste votre point d’entrée pour utiliser facilement la librairie eQ‑3 et le tableau de bord chauffage.
 > Astuce : utilisez le `Makefile` pour simplifier ces commandes (`make dev`, `make build`, `make frontend-dev`, `make stop`).
+
+### Mode debug frontend
+
+Pour visualiser des données fictives (y compris des capteurs en `battery_low`) sans dépendre de l’API, définissez la variable d’environnement Vite :
+
+```bash
+cd chauffage/frontend
+VITE_DEBUG_MODE=true npm run dev
+```
+
+ou créez un fichier `.env.local` avec `VITE_DEBUG_MODE=true`. Dans ce mode, le dashboard affiche des valeurs simulées (`src/config/debug.js`).
+
+### Choix du thème (clair/sombre/auto)
+
+Le frontend accepte la variable `VITE_THEME_MODE` (`light`, `dark` ou `auto`).
+
+- `light` : thème clair permanent.
+- `dark` : thème sombre permanent.
+- `auto` : thème clair entre 07:00 et 19:00, sombre le reste du temps (l’évaluation est refaite toutes les minutes).
+
+Exemple :
+
+```bash
+VITE_THEME_MODE=auto npm run dev
+```
+
+ou dans `.env.local` : `VITE_THEME_MODE=auto`.
+
+Toutes les variables frontend peuvent être définies dans `chauffage/frontend/.env.local` (copiez `.env.example` comme base).

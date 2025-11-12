@@ -2,6 +2,20 @@ import "vuetify/styles";
 import { createVuetify } from "vuetify";
 import { aliases, mdi } from "vuetify/iconsets/mdi";
 
+const dashboardLight = {
+  dark: false,
+  colors: {
+    background: "#f6f7fb",
+    surface: "#ffffff",
+    primary: "#5c6ac4",
+    secondary: "#4c6ef5",
+    error: "#ef5350",
+    warning: "#ffb300",
+    success: "#43a047",
+    info: "#1e88e5",
+  },
+};
+
 const dashboardDark = {
   dark: true,
   colors: {
@@ -16,11 +30,17 @@ const dashboardDark = {
   },
 };
 
-export default createVuetify({
+export const themeNames = {
+  light: "dashboardLight",
+  dark: "dashboardDark",
+};
+
+const vuetify = createVuetify({
   theme: {
-    defaultTheme: "dashboardDark",
+    defaultTheme: themeNames.light,
     themes: {
-      dashboardDark,
+      [themeNames.light]: dashboardLight,
+      [themeNames.dark]: dashboardDark,
     },
   },
   icons: {
@@ -31,3 +51,5 @@ export default createVuetify({
     },
   },
 });
+
+export default vuetify;

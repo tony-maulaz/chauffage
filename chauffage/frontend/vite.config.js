@@ -12,6 +12,14 @@ export default defineConfig({
       autoImport: true,
     }),
   ],
+  server: {
+    host: '0.0.0.0',
+    port: 4173,
+    watch: {
+      usePolling: true,
+      interval: 100,
+    },
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
