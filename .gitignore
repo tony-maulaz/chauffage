@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+.venv/
+venv/
+env/
+build/
+dist/
+*.egg-info/
+
+# VSCode / IDE
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node / Vue
+chauffage/frontend/node_modules/
+chauffage/frontend/dist/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment / secrets
+.env
+*.env
+config.ini
+token.txt
+authtoken.txt
+test_api/token.txt
+test_api/authtoken.txt
+hmip_config.ini

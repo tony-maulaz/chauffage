@@ -1,0 +1,26 @@
+services:
+  chauffage:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chauffage-backend
+    ports:
+      - "8000:8000"
+    environment:
+      HMIP_CONFIG: /data/config.ini
+    volumes:
+      - ./config.ini:/data/config.ini:ro
+    restart: unless-stopped
+
+  frontend-dev:
+    image: node:20-slim
+    container_name: chauffage-frontend-dev
+    working_dir: /workspace/frontend
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 4173"
+    ports:
+      - "4173:4173"
+    volumes:
+      - ./chauffage/frontend:/workspace/frontend
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
