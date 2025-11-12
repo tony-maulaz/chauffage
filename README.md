@@ -194,6 +194,21 @@ VITE_DEBUG_MODE=true npm run dev
 
 ou créez un fichier `.env.local` avec `VITE_DEBUG_MODE=true`. Dans ce mode, le dashboard affiche des valeurs simulées (`src/config/debug.js`).
 
+### Connexion backend quand le front tourne en dev
+
+Quand vous lancez `make frontend-dev` (Vite), indiquez où joindre l’API :
+
+```bash
+cd chauffage/frontend
+echo "VITE_API_BASE_URL=http://localhost:8000" >> .env.local
+```
+
+Le backend accepte par défaut les origines `http://localhost:4173` et `http://127.0.0.1:4173`. Pour en ajouter d’autres (tablettes, proxy, etc.), exportez `ALLOWED_CORS_ORIGINS` avant de lancer `make dev` :
+
+```bash
+ALLOWED_CORS_ORIGINS="http://localhost:4173,http://my-tablet.local:4173" make dev
+```
+
 ### Choix du thème (clair/sombre/auto)
 
 Le frontend accepte la variable `VITE_THEME_MODE` (`light`, `dark` ou `auto`).

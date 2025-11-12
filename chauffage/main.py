@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -13,18 +14,33 @@ from .backend import api
 
 app = api.app
 
+_default_origins = [
+    "http://localhost:4173",
+    "http://127.0.0.1:4173",
+]
+
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv("ALLOWED_CORS_ORIGINS", ",".join(_default_origins)).split(",")
+    if origin.strip()
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 FRONTEND_DIST = Path(__file__).resolve().parent / "frontend" / "dist"
 
 if FRONTEND_DIST.exists():
     app.mount(
-        "/app",
+        "/",
         StaticFiles(directory=FRONTEND_DIST, html=True),
         name="frontend",
     )
-
-    @app.get("/", include_in_schema=False)
-    async def frontend_index():
-        return FileResponse(FRONTEND_DIST / "index.html")
 else:
 
     @app.get("/", include_in_schema=False)

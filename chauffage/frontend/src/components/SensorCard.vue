@@ -150,6 +150,12 @@ const isVeryStale = computed(() => {
   color: #0f111a;
 }
 
+.v-theme--dashboardDark .sensor-card {
+  background: rgba(19, 20, 27, 0.95);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #f4f6ff;
+}
+
 .sensor-card--placeholder {
   opacity: 0.4;
   border-style: dashed;
@@ -218,10 +224,23 @@ const isVeryStale = computed(() => {
   letter-spacing: 0.5px;
 }
 
+.v-theme--dashboardDark .sensor-card__timestamp--alert {
+  color: #ff8a80;
+}
+
+.v-theme--dashboardDark .sensor-card__timestamp-pill {
+  background-color: rgba(229, 115, 115, 0.2);
+  color: #ffab91;
+}
+
 .sensor-card__setpoint {
   font-size: 0.85rem;
   font-weight: 600;
   color: #1e88e5;
+}
+
+.v-theme--dashboardDark .sensor-card__setpoint {
+  color: #90caf9;
 }
 
 .sensor-card__side {
@@ -257,6 +276,14 @@ const isVeryStale = computed(() => {
 
 .sensor-card__regulation-icon--hot {
   color: #ff7043;
+}
+
+.v-theme--dashboardDark .sensor-card__regulation-icon--cold {
+  color: #4fc3f7;
+}
+
+.v-theme--dashboardDark .sensor-card__regulation-icon--hot {
+  color: #ff8a65;
 }
 
 .sensor-card__reachable {
