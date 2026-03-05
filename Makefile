@@ -1,9 +1,9 @@
 DOCKER_COMPOSE ?= docker compose
 FRONTEND_DIR := chauffage/frontend
 
-.PHONY: dev build frontend-dev stop clean
+.PHONY: start build frontend-dev stop clean
 
-dev:
+start:
 	$(DOCKER_COMPOSE) up --build chauffage
 
 frontend-dev:
