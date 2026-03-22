@@ -21,6 +21,8 @@ from numbers import Number
 from pathlib import Path
 from typing import List, Optional
 
+REFRESH_INTERVAL_SECONDS = 60  # minimum seconds between cloud refreshes
+
 from fastapi import FastAPI, HTTPException
 from homematicip.async_home import AsyncHome
 from pydantic import BaseModel
@@ -55,6 +57,7 @@ def load_credentials() -> tuple[str, str]:
 ACCESS_POINT_ID, AUTH_TOKEN = load_credentials()
 hm_home: Optional[AsyncHome] = None
 home_lock = asyncio.Lock()
+_last_refresh: Optional[datetime] = None
 
 app = FastAPI(
     title="Homematic IP Sensors API",
@@ -89,14 +92,20 @@ class SensorResponse(DeviceResponse):
 
 
 async def ensure_home(refresh: bool = True) -> AsyncHome:
-    """Create the AsyncHome connection once and optionally refresh the state."""
-    global hm_home
+    """Create the AsyncHome connection once and refresh the state at most once per REFRESH_INTERVAL_SECONDS."""
+    global hm_home, _last_refresh
     async with home_lock:
         if hm_home is None:
             hm_home = AsyncHome()
             await hm_home.init_async(ACCESS_POINT_ID, AUTH_TOKEN)
         if refresh:
-            await hm_home.get_current_state_async(clear_config=True)
+            now = datetime.now(timezone.utc)
+            if _last_refresh is None or (now - _last_refresh).total_seconds() >= REFRESH_INTERVAL_SECONDS:
+                try:
+                    await hm_home.get_current_state_async(clear_config=True)
+                    _last_refresh = now
+                except Exception as exc:
+                    LOGGER.warning("Could not refresh HomematicIP state: %s — serving cached data", exc)
         return hm_home
 
 
